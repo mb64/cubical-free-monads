@@ -2,32 +2,10 @@
 
 module test where
 
-open import Cubical.Core.Everything
-
-compPath : ∀ {ℓ} {A : Set ℓ} {x y z : A} → x ≡ y → y ≡ z → x ≡ z
-compPath {x = x} p q i = hcomp (λ j → λ { (i = i0) → x
-                                        ; (i = i1) → q j })
-                               (p i)
-
-sym : ∀ {l} {A : Set l} {x y : A} → x ≡ y → y ≡ x
-sym f i = f (~ i)
+open import Util
 
 variable
-  l l' l'' : Level
   A B C : Set
-
-_∘_ : {A : Set l} {B : Set l'} {C : Set l''} → (B → C) → (A → B) → A → C
-(f ∘ g) x = f (g x)
-
-infixr 9 _∘_
-
-_$_ : {A : Set l} {B : Set l'} → (A → B) → A → B
-f $ x = f x
-
-infixr 0 _$_
-
-id : {A : Set l} → A → A
-id x = x
 
 data FreeM : Set → Set₁ where
   Pure : A → FreeM A
