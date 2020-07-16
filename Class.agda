@@ -39,9 +39,9 @@ record Applicative (F : (Set → Set₁)) : Set₂ where
       : (f : A → B)
       → (x : A)
       → (pure f <*> pure x) ≡ pure (f x)
-    -- app-intchg
-    --   : (u : F (A → B))
-    --   → (y : A)
-    --   → (u <*> pure y) ≡ (pure (_$ y) <*> u)
+    app-intchg
+      : (u : F (A → B))
+      → (y : A)
+      → (u <*> pure y) ≡ (pure (_$ y) <*> u)
 
   open Functor functor public

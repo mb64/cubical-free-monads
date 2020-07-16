@@ -69,3 +69,6 @@ freem-ap .Applicative.app-compose u v w
 freem-ap .Applicative.app-homo f x
   = compPath (LeftId f (λ f' → Bind (Pure x) (λ x' → Pure (f' x'))))
              (LeftId x (λ x' → Pure (f x')))
+freem-ap .Applicative.app-intchg u y
+  = compPath (λ i → Bind u (λ f → LeftId y (Pure ∘ f) i))
+             (λ i → LeftId (_$ y) (λ f → Bind u (Pure ∘ f)) (~ i))
