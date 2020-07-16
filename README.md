@@ -1,5 +1,7 @@
 # Verified (cubical) free monads
 
+An experiment in Cubical Agda.
+
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ## Free monads are not legit monads
@@ -42,6 +44,13 @@ data FreeReader (R : Set) : Set → Set₁ where
     → (g : B → FreeReader R C)
     → Bind (Bind m f) g ≡ Bind m (λ x → Bind (f x) g)
 ```
+
+Then, it can be proven to follow the functor, applicative functor, and monad
+laws.
+
+(This is a lot better than without cubical type theory: usually, it's
+impossible to even prove the *normal* Reader monad is a functor, since that
+requires function extensionality.)
 
 ## File layout
 
