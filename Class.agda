@@ -8,7 +8,7 @@ private
   variable
     A B C : Set
 
-record Functor (F : (Set → Set₁)) : Set₂ where
+record Functor (F : Set → Set₁) : Set₂ where
   field
     fmap : (A → B) → F A → F B
     fmap-id-legit : (m : F A) → fmap id m ≡ m
@@ -22,7 +22,7 @@ record Functor (F : (Set → Set₁)) : Set₂ where
 
 open Functor
 
-record Applicative (F : (Set → Set₁)) : Set₂ where
+record Applicative (F : Set → Set₁) : Set₂ where
   infixl 4 _<*>_
 
   field
@@ -45,3 +45,29 @@ record Applicative (F : (Set → Set₁)) : Set₂ where
       → (u <*> pure y) ≡ (pure (_$ y) <*> u)
 
   open Functor functor public
+
+record Monad (M : Set → Set₁) : Set₂ where
+  infixl 1 _>>=_
+
+  field
+    applicative : Applicative M
+    _>>=_ : M A → (A → M B) → M B
+
+  open Applicative applicative public
+
+  return : A → M A
+  return = pure
+
+  field
+    monad-left-id
+      : (a : A)
+      → (f : A → M B)
+      → (return a >>= f) ≡ f a
+    monad-right-id
+      : (m : M A)
+      → (m >>= return) ≡ m
+    monad-assoc
+      : (m : M A)
+      → (f : A → M B)
+      → (g : B → M C)
+      → (m >>= f >>= g) ≡ (m >>= (λ x → f x >>= g))

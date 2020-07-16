@@ -1,6 +1,6 @@
 {-# OPTIONS --cubical --safe #-}
 
-module test where
+module FreeM where
 
 open import Util
 open import Class
@@ -72,3 +72,10 @@ freem-ap .Applicative.app-homo f x
 freem-ap .Applicative.app-intchg u y
   = compPath (λ i → Bind u (λ f → LeftId y (Pure ∘ f) i))
              (λ i → LeftId (_$ y) (λ f → Bind u (Pure ∘ f)) (~ i))
+
+freem-monad : Monad FreeM
+freem-monad .Monad.applicative    = freem-ap
+freem-monad .Monad._>>=_          = Bind
+freem-monad .Monad.monad-left-id  = LeftId
+freem-monad .Monad.monad-right-id = RightId
+freem-monad .Monad.monad-assoc    = Assoc
