@@ -3,6 +3,8 @@
 module test where
 
 open import Util
+open import Class
+open Functor
 
 variable
   A B C : Set
@@ -23,20 +25,6 @@ data FreeM : Set → Set₁ where
     → (g : B → FreeM C)
     → Bind (Bind m f) g ≡ Bind m (λ x → Bind (f x) g)
 
-record Functor (F : (Set → Set₁)) : Set₂ where
-  field
-    fmap : (A → B) → F A → F B
-    fmap-id-legit : (m : F A) → fmap id m ≡ m
-    fmap-compose-legit
-      : (m : F A)
-      → (f : B → C)
-      → (g : A → B)
-      → fmap (f ∘ g) m ≡ fmap f (fmap g m)
-  _<$>_ : (A → B) → F A → F B
-  f <$> x = fmap f x
-
-open Functor
-
 freem-functor : Functor FreeM
 freem-functor .fmap f m = Bind m (Pure ∘ f)
 freem-functor .fmap-id-legit m i = RightId m i
@@ -46,29 +34,6 @@ freem-functor .fmap-compose-legit m f g i
                    })
           (Bind m (λ x → LeftId (g x) (Pure ∘ f) (~ i)))
 
-record Applicative (F : (Set → Set₁)) : Set₂ where
-  infixl 4 _<*>_
-
-  field
-    functor : Functor F
-    pure : A → F A
-    _<*>_ : F (A → B) → F A → F B
-    app-identity : (v : F A) → (pure id <*> v) ≡ v
-    app-compose
-      : (u : F (B → C))
-      → (v : F (A → B))
-      → (w : F A)
-      → (pure _∘_ <*> u <*> v <*> w) ≡ (u <*> (v <*> w))
-    app-homo
-      : (f : A → B)
-      → (x : A)
-      → (pure f <*> pure x) ≡ pure (f x)
-    -- app-intchg
-    --   : (u : F (A → B))
-    --   → (y : A)
-    --   → (u <*> pure y) ≡ (pure (_$ y) <*> u)
-
-  open Functor functor public
 
 freem-ap : Applicative FreeM
 freem-ap .Applicative.functor = freem-functor
