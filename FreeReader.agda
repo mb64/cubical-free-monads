@@ -9,10 +9,13 @@ open Functor
 variable
   A B C : Set
 
+-- The Reader monad, as a free monad
 data FreeReader (R : Set) : Set → Set₁ where
   Pure : A → FreeReader R A
   Bind : FreeReader R A → (A → FreeReader R B) → FreeReader R B
   Ask : FreeReader R R
+
+  -- Monad laws
   LeftId : ∀ {A B}
     → (a : A)
     → (f : A → FreeReader R B)
