@@ -1,6 +1,6 @@
 {-# OPTIONS --cubical --safe #-}
 
-module FreeM where
+module FreeReader where
 
 open import Util
 open import Class
@@ -9,42 +9,43 @@ open Functor
 variable
   A B C : Set
 
-data FreeM : Set → Set₁ where
-  Pure : A → FreeM A
-  Bind : FreeM A → (A → FreeM B) → FreeM B
+data FreeReader (R : Set) : Set → Set₁ where
+  Pure : A → FreeReader R A
+  Bind : FreeReader R A → (A → FreeReader R B) → FreeReader R B
+  Ask : FreeReader R R
   LeftId : ∀ {A B}
     → (a : A)
-    → (f : A → FreeM B)
+    → (f : A → FreeReader R B)
     → Bind (Pure a) f ≡ f a
   RightId : ∀ {A}
-    → (m : FreeM A)
+    → (m : FreeReader R A)
     → Bind m Pure ≡ m
   Assoc : ∀ {A B C}
-    → (m : FreeM A)
-    → (f : A → FreeM B)
-    → (g : B → FreeM C)
+    → (m : FreeReader R A)
+    → (f : A → FreeReader R B)
+    → (g : B → FreeReader R C)
     → Bind (Bind m f) g ≡ Bind m (λ x → Bind (f x) g)
 
-freem-functor : Functor FreeM
-freem-functor .fmap f m = Bind m (Pure ∘ f)
-freem-functor .fmap-id-legit m i = RightId m i
-freem-functor .fmap-compose-legit m f g i
+freereader-functor : ∀ {R} → Functor (FreeReader R)
+freereader-functor .fmap f m = Bind m (Pure ∘ f)
+freereader-functor .fmap-id-legit m i = RightId m i
+freereader-functor .fmap-compose-legit m f g i
   = hcomp (λ j → λ { (i = i0) → Bind m (Pure ∘ f ∘ g)
                    ; (i = i1) → Assoc m (Pure ∘ g) (Pure ∘ f) (~ j)
                    })
           (Bind m (λ x → LeftId (g x) (Pure ∘ f) (~ i)))
 
 
-freem-ap : Applicative FreeM
-freem-ap .Applicative.functor = freem-functor
-freem-ap .Applicative.pure = Pure
-freem-ap .Applicative._<*>_ mf m = Bind mf (λ f → Bind m (Pure ∘ f))
-freem-ap .Applicative.app-identity v i
+freereader-ap : ∀ {R} → Applicative (FreeReader R)
+freereader-ap .Applicative.functor = freereader-functor
+freereader-ap .Applicative.pure = Pure
+freereader-ap .Applicative._<*>_ mf m = Bind mf (λ f → Bind m (Pure ∘ f))
+freereader-ap .Applicative.app-identity v i
   = hcomp (λ j → λ { (i = i0) → LeftId id (λ f → Bind v (Pure ∘ f)) (~ j)
                    ; (i = i1) → v
                    })
           (RightId v i)
-freem-ap .Applicative.app-compose u v w
+freereader-ap .Applicative.app-compose u v w
   -- For some reason, Agda doesn't like wildcards in cubical proofs. Oh well.
   -- Start: Pure _∘_ <*> u <*> v <*> w
   = compPath {y = Bind u (λ u' → Pure (u' ∘_)) <*> v <*> w}
@@ -65,17 +66,17 @@ freem-ap .Applicative.app-compose u v w
            (λ i → Bind u (λ u' → Bind v (λ v' → Assoc w (Pure ∘ v') (Pure ∘ u') (~ i))))
            (λ i → Bind u (λ u' → Assoc v (λ f → Bind w (Pure ∘ f)) (Pure ∘ u') (~ i)))
   -- End: Bind u (λ u' → Bind (Bind v (λ v' → Bind w (Pure ∘ v')) (Pure ∘ u'))
-  where open Applicative freem-ap
-freem-ap .Applicative.app-homo f x
+  where open Applicative freereader-ap
+freereader-ap .Applicative.app-homo f x
   = compPath (LeftId f (λ f' → Bind (Pure x) (λ x' → Pure (f' x'))))
              (LeftId x (λ x' → Pure (f x')))
-freem-ap .Applicative.app-intchg u y
+freereader-ap .Applicative.app-intchg u y
   = compPath (λ i → Bind u (λ f → LeftId y (Pure ∘ f) i))
              (λ i → LeftId (_$ y) (λ f → Bind u (Pure ∘ f)) (~ i))
 
-freem-monad : Monad FreeM
-freem-monad .Monad.applicative    = freem-ap
-freem-monad .Monad._>>=_          = Bind
-freem-monad .Monad.monad-left-id  = LeftId
-freem-monad .Monad.monad-right-id = RightId
-freem-monad .Monad.monad-assoc    = Assoc
+freereader-monad : ∀ {R} → Monad (FreeReader R)
+freereader-monad .Monad.applicative    = freereader-ap
+freereader-monad .Monad._>>=_          = Bind
+freereader-monad .Monad.monad-left-id  = LeftId
+freereader-monad .Monad.monad-right-id = RightId
+freereader-monad .Monad.monad-assoc    = Assoc

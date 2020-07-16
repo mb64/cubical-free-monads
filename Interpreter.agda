@@ -3,13 +3,14 @@
 module Interpreter where
 
 open import Util
-open import FreeM
+open import FreeReader
 
--- Runs it in the identity monad
-runFreeM : FreeM A → A
-runFreeM (Pure x) = x
-runFreeM (Bind x f) = runFreeM $ f $ runFreeM x
+-- Runs it in the reader monad
+runFree : ∀ {R A} → R → FreeReader R A → A
+runFree r (Pure x) = x
+runFree r (Bind x f) = runFree r $ f $ runFree r x
+runFree r Ask = r
 -- Since it's so simple, all these compute nicely
-runFreeM (LeftId a f i) = runFreeM $ f a
-runFreeM (RightId x i) = runFreeM x
-runFreeM (Assoc x f g i) = runFreeM $ g $ runFreeM $ f $ runFreeM x
+runFree r (LeftId a f i) = runFree r $ f a
+runFree r (RightId x i) = runFree r x
+runFree r (Assoc x f g i) = runFree r $ g $ runFree r $ f $ runFree r x
