@@ -2,11 +2,19 @@
 
 module Class where
 
-open import Util
+open import Cubical.Core.Everything
+open import Function.Base using (id; _$_)
 
 private
   variable
     A B C : Set
+    ℓ ℓ′ ℓ″ : Level
+
+-- Custom non-dependent definition, since the one in the prelude is too general
+_∘_ : {A : Set ℓ} {B : Set ℓ′} {C : Set ℓ″} → (B → C) → (A → B) → A → C
+(f ∘ g) x = f (g x)
+
+infixr 9 _∘_
 
 record Functor (F : Set → Set₁) : Set₂ where
   field

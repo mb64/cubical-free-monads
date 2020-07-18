@@ -1,0 +1,3 @@
+name: cubical-free-monads
+include: .
+depend: cubical standard-library

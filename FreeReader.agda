@@ -2,7 +2,10 @@
 
 module FreeReader where
 
-open import Util
+open import Cubical.Core.Everything
+open import Cubical.Foundations.Prelude
+open import Function.Base using (id; _$_)
+
 open import Class
 open Functor
 
@@ -50,32 +53,39 @@ freereader-ap .Applicative.app-identity v i
           (RightId v i)
 freereader-ap .Applicative.app-compose u v w
   -- For some reason, Agda doesn't like wildcards in cubical proofs. Oh well.
-  -- Start: Pure _∘_ <*> u <*> v <*> w
-  = compPath {y = Bind u (λ u' → Pure (u' ∘_)) <*> v <*> w}
-           (λ i → LeftId _∘_ (λ f → Bind u (Pure ∘ f)) i <*> v <*> w)
-  $ compPath {y = Bind u (λ u' → Bind (Pure (u' ∘_)) (λ c → Bind v (Pure ∘ c))) <*> w}
-           (λ i → Assoc u (λ u' → Pure (u' ∘_)) (λ f → Bind v (Pure ∘ f)) i <*> w)
-  $ compPath {y = Bind u (λ u' → Bind v (λ v' → Pure (u' ∘ v'))) <*> w}
-           (λ i → Bind u (λ u' → LeftId (u' ∘_) (λ c → Bind v (Pure ∘ c)) i) <*> w)
-  $ compPath {y = Bind u (λ u' → Bind (Bind v (λ v' → Pure (u' ∘ v'))) (λ f → Bind w (Pure ∘ f)))}
-           (λ i → Assoc u (λ u' → Bind v (λ v' → Pure (u' ∘ v'))) (λ f → Bind w (Pure ∘ f)) i)
-  $ compPath {y = Bind u (λ u' → Bind v (λ v' → Bind (Pure (u' ∘ v')) (λ f → Bind w (Pure ∘ f))))}
-           (λ i → Bind u (λ u' → Assoc v (λ v' → Pure (u' ∘ v')) (λ f → Bind w (Pure ∘ f)) i))
-  $ compPath {y = Bind u (λ u' → Bind v (λ v' → Bind w (Pure ∘ u' ∘ v')))}
-           (λ i → Bind u (λ u' → Bind v (λ v' → LeftId (u' ∘ v') (λ f → Bind w (Pure ∘ f)) i)))
-  $ compPath {y = Bind u (λ u' → Bind v (λ v' → Bind w (λ w' → Bind (Pure (v' w')) (Pure ∘ u'))))}
-           (λ i → Bind u (λ u' → Bind v (λ v' → Bind w (λ w' → LeftId (v' w') (Pure ∘ u') (~ i)))))
-  $ compPath {y = Bind u (λ u' → Bind v (λ v' → Bind (Bind w (Pure ∘ v')) (Pure ∘ u')))}
-           (λ i → Bind u (λ u' → Bind v (λ v' → Assoc w (Pure ∘ v') (Pure ∘ u') (~ i))))
-           (λ i → Bind u (λ u' → Assoc v (λ f → Bind w (Pure ∘ f)) (Pure ∘ u') (~ i)))
-  -- End: Bind u (λ u' → Bind (Bind v (λ v' → Bind w (Pure ∘ v')) (Pure ∘ u'))
+        = Pure _∘_ <*> u <*> v <*> w
+  ≡[ i ]⟨ LeftId _∘_ (λ f → Bind u (Pure ∘ f)) i <*> v <*> w ⟩
+          Bind u (λ u' → Pure (u' ∘_)) <*> v <*> w
+  ≡[ i ]⟨ Assoc u (λ u' → Pure (u' ∘_)) (λ f → Bind v (Pure ∘ f)) i <*> w ⟩
+          Bind u (λ u' → Bind (Pure (u' ∘_)) (λ c → Bind v (Pure ∘ c))) <*> w
+  ≡[ i ]⟨ Bind u (λ u' → LeftId (u' ∘_) (λ c → Bind v (Pure ∘ c)) i) <*> w ⟩
+          Bind u (λ u' → Bind v (λ v' → Pure (u' ∘ v'))) <*> w
+  ≡[ i ]⟨ Assoc u (λ u' → Bind v (λ v' → Pure (u' ∘ v'))) (λ f → Bind w (Pure ∘ f)) i ⟩
+          Bind u (λ u' → Bind (Bind v (λ v' → Pure (u' ∘ v'))) (λ f → Bind w (Pure ∘ f)))
+  ≡[ i ]⟨ Bind u (λ u' → Assoc v (λ v' → Pure (u' ∘ v')) (λ f → Bind w (Pure ∘ f)) i) ⟩
+          Bind u (λ u' → Bind v (λ v' → Bind (Pure (u' ∘ v')) (λ f → Bind w (Pure ∘ f))))
+  ≡[ i ]⟨ Bind u (λ u' → Bind v (λ v' → LeftId (u' ∘ v') (λ f → Bind w (Pure ∘ f)) i)) ⟩
+          Bind u (λ u' → Bind v (λ v' → Bind w (Pure ∘ u' ∘ v')))
+  ≡[ i ]⟨ Bind u (λ u' → Bind v (λ v' → Bind w (λ w' → LeftId (v' w') (Pure ∘ u') (~ i)))) ⟩
+          Bind u (λ u' → Bind v (λ v' → Bind w (λ w' → Bind (Pure (v' w')) (Pure ∘ u'))))
+  ≡[ i ]⟨ Bind u (λ u' → Bind v (λ v' → Assoc w (Pure ∘ v') (Pure ∘ u') (~ i))) ⟩
+          Bind u (λ u' → Bind v (λ v' → Bind (Bind w (Pure ∘ v')) (Pure ∘ u')))
+  ≡[ i ]⟨ Bind u (λ u' → Assoc v (λ f → Bind w (Pure ∘ f)) (Pure ∘ u') (~ i)) ⟩
+          Bind u (λ u' → Bind (Bind v (λ v' → Bind w (Pure ∘ v'))) (Pure ∘ u'))
+          ∎
   where open Applicative freereader-ap
 freereader-ap .Applicative.app-homo f x
-  = compPath (LeftId f (λ f' → Bind (Pure x) (λ x' → Pure (f' x'))))
-             (LeftId x (λ x' → Pure (f x')))
+  = LeftId f (λ f' → Bind (Pure x) (λ x' → Pure (f' x')))
+  ∙ LeftId x (λ x' → Pure (f x'))
 freereader-ap .Applicative.app-intchg u y
-  = compPath (λ i → Bind u (λ f → LeftId y (Pure ∘ f) i))
-             (λ i → LeftId (_$ y) (λ f → Bind u (Pure ∘ f)) (~ i))
+          -- u <*> pure y
+        = Bind u (λ u' → Bind (Pure y) (Pure ∘ u'))
+  ≡[ i ]⟨ Bind u (λ u' → LeftId y (Pure ∘ u') i) ⟩
+          Bind u (λ u' → Pure (u' y))
+  ≡[ i ]⟨ LeftId (_$ y) (λ f → Bind u (Pure ∘ f)) (~ i) ⟩
+          Bind (Pure (_$ y)) (λ _y' → Bind u (λ u' → Pure (u' y')))
+          -- pure (_$ y) <*> u
+          ∎
 
 freereader-monad : ∀ {R} → Monad (FreeReader R)
 freereader-monad .Monad.applicative    = freereader-ap

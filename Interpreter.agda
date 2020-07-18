@@ -2,7 +2,7 @@
 
 module Interpreter where
 
-open import Util
+open import Function.Base using (_$_)
 open import FreeReader
 
 -- Runs it in the reader monad

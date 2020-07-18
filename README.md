@@ -54,10 +54,28 @@ requires function extensionality.)
 
 ## File layout
 
- * `Util.agda` has some standard functions like `$` and `id`
  * `Class.agda` has the `Funtor`, `Applicative`, and `Monad` classes, including
    all their laws
  * `FreeReader.agda` has `FreeReader R`'s instances, including all the proofs
    that they're legit
  * `Interpreter.agda` has the `runFree` function, which runs `FreeReader`, and
    proves that it respects the monad laws
+
+## Non-ASCII Unicode used
+
+```
+Char   Emacs
+ →      \r
+ λ      \lambda
+ ≡      \==
+ ₁      \_1
+ ₂      \_2
+ ∘      \o
+ ∀      \forall
+ ∙      \.
+ ⟨      \<
+ ⟩      \>
+ ℓ      \ell
+ ′      \'1
+ ″      \'2
+```
